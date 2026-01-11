@@ -40,8 +40,8 @@ form.addEventListener('submit', async (e) => {
         const limit = shipData.limit_value || 1450; 
         const emissions = shipData.co2_total || 0;
 
-        const aiText = await fetchAiReport(shipData.name, emissions, limit);
-        console.log("KI Bericht:", aiText);
+        //const aiText = await fetchAiReport(shipData.name, emissions, limit);
+        //console.log("KI Bericht:", aiText);
         
         // Optional: KI Text anzeigen (wenn du ein Element dafür im HTML hast)
         // document.getElementById('aiOutput').innerText = aiText;
