@@ -11,7 +11,9 @@ print("Lade Schiffsdatenbank (Parquet)...")
 try:
     # Lade die Datei einmalig beim Start in den RAM
     df = pd.read_parquet('ship_report_imo_2024.parquet')
-    
+    df.columns = [c.lower() for c in df.columns]
+    print("Spalten in DB:", df.columns.tolist())
+
     # Damit wir leichter suchen können, stellen wir sicher, dass die IMO ein String ist
     # Passe 'imo' an den echten Spaltennamen in deiner Datei an!
     if 'imo' in df.columns:
@@ -55,7 +57,7 @@ model = Model(
 # 1. Route: Liefert deine HTML-Seite aus (Frontend)
 @app.route('/')
 def serve_index():
-    return send_from_directory('public', 'index_copy.html')
+    return send_from_directory('public', 'index.html')
 
 #2. Route: API für die Schiffssuche aus der Parquet-Datei
 @app.route('/api/search-ship', methods=['GET'])
@@ -71,7 +73,7 @@ def search_ship():
     
     if ship_row.empty:
         return jsonify({"found": False, "message": "Schiff nicht gefunden"}), 404
-    
+
     # Konvertiere die erste gefundene Zeile in ein Dictionary (JSON)
     ship_data = ship_row.iloc[0].to_dict()
     

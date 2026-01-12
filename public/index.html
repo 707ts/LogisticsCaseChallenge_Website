@@ -44,22 +44,38 @@
             <p id="statusMsg" class="mt-4 text-sm text-gray-500"></p>
         </section>
 
-        <section id="resultsSection" class="hidden animate-fade-in max-w-4xl mx-auto">
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 mb-6">
-                <div class="gradient-hero p-6">
-                    <h3 id="uiName" class="text-2xl font-bold">Name</h3>
-                    <p class="opacity-80">IMO: <span id="uiImo"></span></p>
-                </div>
-                <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm" id="shipDetailsGrid">
-                    </div>
+<section id="resultsSection" class="hidden animate-fade-in max-w-4xl mx-auto space-y-8">
+    
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+        <div class="gradient-hero p-6 flex justify-between items-start">
+            <div>
+                <h3 id="uiName" class="text-3xl font-bold">Schiffsname</h3>
+                <p class="opacity-80 mt-1 text-lg">IMO: <span id="uiImo">1234567</span></p>
             </div>
+        </div>
+        <div id="shipDetailsGrid" class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            </div>
+    </div>
 
-            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                <i data-lucide="calculator" class="text-blue-600"></i> Berechnungsergebnisse
-            </h4>
-            <div class="grid sm:grid-cols-2 gap-4" id="metricsGrid">
-                </div>
-        </section>
+    <div>
+        <h4 class="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800">
+            <i data-lucide="activity" class="text-blue-600"></i>
+            AIS Bewegungsdaten
+        </h4>
+        <div id="metricsGrid" class="grid md:grid-cols-2 gap-4">
+            </div>
+    </div>
+
+    <div>
+        <h4 class="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800">
+            <i data-lucide="clipboard-check" class="text-indigo-600"></i>
+            Compliance Bewertung
+        </h4>
+        <div id="complianceGrid" class="grid md:grid-cols-3 gap-4">
+            </div>
+    </div>
+
+</section>
 
     </main>
 
