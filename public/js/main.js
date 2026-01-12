@@ -4,6 +4,8 @@ lucide.createIcons();
 const form = document.getElementById('searchForm');
 const resultsSection = document.getElementById('resultsSection');
 const statusMsg = document.getElementById('statusMsg');
+const aiButton = document.getElementById('aiButton');
+let currentShipData = null;
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -13,6 +15,7 @@ form.addEventListener('submit', async (e) => {
     // UI Reset
     setLoading(true);
     resultsSection.classList.add('hidden');
+    aiButton.classList.add('hidden');
     statusMsg.textContent = "Suche Schiff in Datenbank...";
     statusMsg.className = "mt-4 text-blue-600";
 
@@ -28,25 +31,13 @@ form.addEventListener('submit', async (e) => {
         const shipDataRaw = result.data;
         console.log("Gefundene Daten:", shipDataRaw); // Hilft dir beim Debuggen der Spaltennamen!
         const shipData = roundNumbers(shipDataRaw);
+        currentShipData = shipData;
+        aiButton.classList.remove('hidden');
 
         // 2. UI UPDATEN 
         renderShipDetails(shipData);
         renderMetrics(shipData);
         renderComplianceGrid(shipData);
-
-        // 3. KI REPORT GENERIEREN
-        statusMsg.textContent = "Generiere KI-Analyse...";
-        
-        // Annahme: Dein Parquet hat eine Spalte 'limit_value' oder ähnlich. 
-        // Falls nicht, setze hier einen festen Wert oder berechne ihn im Python-Code.
-        //const limit = shipData.limit_value || 1450; 
-        //const emissions = shipData.co2_total || 0;
-
-        //const aiText = await fetchAiReport(shipData.name, emissions, limit);
-        //console.log("KI Bericht:", aiText);
-        
-        // Optional: KI Text anzeigen (wenn du ein Element dafür im HTML hast)
-        // document.getElementById('aiOutput').innerText = aiText;
 
         statusMsg.textContent = "Daten erfolgreich geladen.";
         statusMsg.className = "mt-4 text-green-600";
@@ -61,18 +52,50 @@ form.addEventListener('submit', async (e) => {
     }
 });
 
+// --- 2. KI REPORT (BUTTON CLICK) ---
+aiButton.addEventListener('click', async () => {
+    if (!currentShipData) return;
+
+    // Ladezustand für den KI Button
+    const originalText = aiButton.innerHTML;
+    aiButton.innerHTML = '<span class="animate-pulse">Analysiere...</span>';
+    aiButton.disabled = true;
+    
+    statusMsg.textContent = "WatsonX generiert Analysebericht...";
+    statusMsg.className = "mt-4 text-indigo-600";
+
+    try {
+        const aiText = await fetchAiReport(currentShipData);
+        
+        console.log("KI Bericht:", aiText);
+        
+        statusMsg.textContent = "Analyse abgeschlossen.";
+        statusMsg.className = "mt-4 text-green-600";
+
+    } catch (e) {
+        console.error(e);
+        statusMsg.textContent = "Fehler bei der KI-Analyse.";
+        statusMsg.className = "mt-4 text-red-500";
+    } finally {
+        // Button Reset
+        aiButton.innerHTML = originalText;
+        aiButton.disabled = false;
+    }
+});
+
 // Hilfsfunktion für KI
-async function fetchAiReport(name, emissions, limit) {
+async function fetchAiReport(shipData) {
     try {
         const response = await fetch('/api/generate-report', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ shipName: name, emissions: emissions, limit: limit })
+            // ÄNDERUNG: Das komplette Objekt wird als JSON gesendet
+            body: JSON.stringify(shipData) 
         });
         const data = await response.json();
         return data.success ? data.text : "Fehler: " + data.error;
     } catch (e) {
-        return "Netzwerkfehler bei KI Anfrage";
+        return "Netzwerkfehler";
     }
 }
 
