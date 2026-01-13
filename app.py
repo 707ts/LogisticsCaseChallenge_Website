@@ -1,9 +1,11 @@
 # app.py
 import os
-import pandas as pd # NEU: Für die Parquet Datei
-from flask import Flask, request, jsonify, send_from_directory
+import pandas as pd 
+from flask import Flask, request, jsonify, send_from_directory, send_file
 from ibm_watsonx_ai import APIClient
 from ibm_watsonx_ai.foundation_models import Model
+from report_gen import generate_report_pdf
+
 
 app = Flask(__name__, static_url_path='', static_folder='public')
 
@@ -114,36 +116,36 @@ def generate_report():
 
     print(f"Anfrage erhalten für: {ship_name} (IMO: {imo})")
 
-    prompt = f"""Du bist ein Experte für maritime Regulatorik und Datenanalyse im Kontext der EU-MRV und FuelEU Maritime Verordnungen.
+    prompt = f"""You are an expert in maritime regulations and data analysis in the context of the EU MRV and FuelEU Maritime regulations.
 
-                Analysiere die folgenden Schiffsdaten für eine behördliche Plausibilitätsprüfung:
+                Analyze the following ship data for an official plausibility check:
 
-                ### 1. Stammdaten & Dimensionen
-                - Schiffsname: {ship_name} (IMO: {imo})
-                - Schiffstyp: {mrv_ship_type}
-                - Abmessungen: Länge {length}m, Breite {width}m, Tiefgang {draft}m
+            ### 1. Master data & dimensions
+				- Ship name: {ship_name} (IMO: {imo})
+				- Ship type: {mrv_ship_type}
+				- Dimensions: Length {length}m, width {width}m, draft {draft}m
 
-                ### 2. AIS-Bewegungsprofil (Berichtsjahr {report_year})
-                - Gesamtfahrstrecke: {ais_distance} nm
-                - Betriebszeit: {ais_time} h
-                - Durchschnittsgeschwindigkeit: {sog_mean} kn (Hochlastbetrieb P95: {sog_p95} kn)
-                - Zeitanteil in Fahrt: {moving_share}
+            ### 2. AIS movement profile (reporting year {report_year})
+				- Total distance traveled: {ais_distance} nm
+				- Operating time: {ais_time} h
+				- Average speed: {sog_mean} kn (high load operation P95: {sog_p95} kn)
+                - Time spent in motion: {moving_share}
 
-                ### 3. Emissionsbewertung (Regression vs. MRV)
-                - Gemeldete Intensität (MRV): {y_mrv} kg CO2/nm
-                - Erwartete Intensität (KI-Modell): {y_pred} kg CO2/nm
-                - Abweichung (Residual): {residual_kg} kg ({residual_pct}%)
-                - Bewertung: {flag_color}
-                - Grund der Bewertung: {flag_reason}
+            ### 3. Emission assessment (regression vs. MRV)
+				- Reported intensity (MRV): {y_mrv} kg CO2/nm
+				- Expected intensity (AI model): {y_pred} kg CO2/nm
+                - Deviation (residual): {residual_kg} kg ({residual_pct}%)
+				- Assessment: {flag_color}
+				- Reason for assessment: {flag_reason}
 
-                ### Deine Aufgabe:
-                1. Erstelle eine prägnante Zusammenfassung des Betriebsprofils (Größe, Aktivität, Geschwindigkeit).
-                2. Bewerte den Status der "flag_color":
-                - Falls GREEN: Bestätige die Plausibilität der gemeldeten Daten im Vergleich zum KI-Modell.
-                - Falls RED: Erkläre die Anomalie basierend auf dem "flag_reason" und weise auf die rechtlichen Konsequenzen einer fehlerhaften MRV-Meldung hin.
-                3. Gib eine kurze Empfehlung für den Inspektor ab.
+            ### Your task:
+				1. Create a concise summary of the operating profile (size, activity, speed).
+				2. Evaluate the status of the “flag_color”:
+				- If GREEN: Confirm the plausibility of the reported data in comparison to the AI model.
+                - If RED: Explain the anomaly based on the “flag_reason” and point out the legal consequences of an incorrect MRV report.
+				3. Provide a brief recommendation for the inspector.
 
-                Antworte strukturiert, professionell und auf Englisch."""
+				Respond in a structured, professional manner and in English."""
 
     try:
         generated_response = model.generate_text(prompt=prompt)
@@ -151,6 +153,29 @@ def generate_report():
         return jsonify({"success": True, "text": text_result})
     except Exception as e:
         print("Fehler:", e)
+        return jsonify({"success": False, "error": str(e)}), 500
+    
+# 4. NEUE ROUTE FÜR PDF DOWNLOAD HINZUFÜGEN
+@app.route('/api/download-pdf', methods=['POST'])
+def download_pdf():
+    data = request.json
+    imo = data.get('imo')
+    text = data.get('text') # Der KI-Text, der im PDF stehen soll
+    
+    if not imo or not text:
+        return jsonify({"error": "Fehlende Daten (IMO oder Text)"}), 400
+
+    print(f"Erstelle PDF für IMO {imo}...")
+    
+    try:
+        # Hier rufen wir dein Skript 'report_gen.py' auf
+        pdf_path = generate_report_pdf(imo, text)
+        
+        # Wir senden die Datei direkt an den Nutzer zurück
+        return send_file(pdf_path, as_attachment=True, download_name=f"FuelEU_Report_{imo}.pdf")
+        
+    except Exception as e:
+        print(f"PDF Fehler: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == '__main__':

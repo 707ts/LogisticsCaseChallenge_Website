@@ -5,6 +5,7 @@ const form = document.getElementById('searchForm');
 const resultsSection = document.getElementById('resultsSection');
 const statusMsg = document.getElementById('statusMsg');
 const aiButton = document.getElementById('aiButton');
+const pdfButton = document.getElementById('pdfButton');
 let currentShipData = null;
 
 form.addEventListener('submit', async (e) => {
@@ -16,7 +17,7 @@ form.addEventListener('submit', async (e) => {
     setLoading(true);
     resultsSection.classList.add('hidden');
     aiButton.classList.add('hidden');
-    statusMsg.textContent = "Suche Schiff in Datenbank...";
+    statusMsg.textContent = "Search Ship in Database...";
     statusMsg.className = "mt-4 text-blue-600";
 
     try {
@@ -25,11 +26,11 @@ form.addEventListener('submit', async (e) => {
         const result = await response.json();
 
         if (!response.ok || !result.found) {
-            throw new Error("Schiff nicht gefunden (Prüfen Sie die IMO-Nummer).");
+            throw new Error("Ship not found (Check the IMO number).");
         }
 
         const shipDataRaw = result.data;
-        console.log("Gefundene Daten:", shipDataRaw); // Hilft dir beim Debuggen der Spaltennamen!
+        console.log("Found Data:", shipDataRaw);
         const shipData = roundNumbers(shipDataRaw);
         currentShipData = shipData;
         aiButton.classList.remove('hidden');
@@ -39,7 +40,7 @@ form.addEventListener('submit', async (e) => {
         renderMetrics(shipData);
         renderComplianceGrid(shipData);
 
-        statusMsg.textContent = "Daten erfolgreich geladen.";
+        statusMsg.textContent = "Data successfully loaded.";
         statusMsg.className = "mt-4 text-green-600";
         resultsSection.classList.remove('hidden');
 
@@ -58,10 +59,10 @@ aiButton.addEventListener('click', async () => {
 
     // Ladezustand für den KI Button
     const originalText = aiButton.innerHTML;
-    aiButton.innerHTML = '<span class="animate-pulse">Analysiere...</span>';
+    aiButton.innerHTML = '<span class="animate-pulse">Analyse...</span>';
     aiButton.disabled = true;
     
-    statusMsg.textContent = "WatsonX generiert Analysebericht...";
+    statusMsg.textContent = "WatsonX generates Report...";
     statusMsg.className = "mt-4 text-indigo-600";
 
     try {
@@ -69,12 +70,19 @@ aiButton.addEventListener('click', async () => {
         
         console.log("KI Bericht:", aiText);
         
-        statusMsg.textContent = "Analyse abgeschlossen.";
+        statusMsg.textContent = "Analyse completed.";
         statusMsg.className = "mt-4 text-green-600";
+
+        currentShipData.aiAnalysisText = aiText;
+        
+        // NEU: PDF Button anzeigen, sobald Text da ist
+        if(pdfButton) {
+            pdfButton.classList.remove('hidden');
+        }
 
     } catch (e) {
         console.error(e);
-        statusMsg.textContent = "Fehler bei der KI-Analyse.";
+        statusMsg.textContent = "Error during KI analysis.";
         statusMsg.className = "mt-4 text-red-500";
     } finally {
         // Button Reset
@@ -93,9 +101,9 @@ async function fetchAiReport(shipData) {
             body: JSON.stringify(shipData) 
         });
         const data = await response.json();
-        return data.success ? data.text : "Fehler: " + data.error;
+        return data.success ? data.text : "Error: " + data.error;
     } catch (e) {
-        return "Netzwerkfehler";
+        return "Network error";
     }
 }
 
@@ -119,7 +127,7 @@ function roundNumbers(value) {
 function renderShipDetails(data) {
     // ACHTUNG: Prüfe in der Browser-Konsole, ob diese Namen (flag, type, etc.) stimmen!
     // Die Namen kommen jetzt direkt aus deiner Parquet-Datei (oft kleingeschrieben).
-    document.getElementById('uiName').textContent = data.ship_name || "Unbekannt";
+    document.getElementById('uiName').textContent = data.ship_name || "Unknown Name";
     document.getElementById('uiImo').textContent = data.imo || data.IMO;
     
     const grid = document.getElementById('shipDetailsGrid');
@@ -146,19 +154,19 @@ function renderMetrics(data) {
         </div>
 
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <p class="text-sm text-gray-500">Time Travelled</p>
+            <p class="text-sm text-gray-500">Time travelled</p>
             <p class="text-2xl font-bold">${data.ais_time_hours_total} h</p>
         </div>
 
 
         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <p class="text-sm text-gray-500">CO₂ Ausstoß (Total) MRV Angabe</p>
-            <p class="text-2xl font-bold">${co2} Kg</p>
+            <p class="text-sm text-gray-500">CO₂ Emission (Total) MRV</p>
+            <p class="text-2xl font-bold">${co2} Kg per NM</p>
         </div>
 
         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <p class="text-sm text-gray-500">Calculated CO₂ per NM</p>
-            <p class="text-2xl font-bold">${co2_pred} Kg</p>
+            <p class="text-sm text-gray-500">Calculated CO₂ Emission</p>
+            <p class="text-2xl font-bold">${co2_pred} Kg per NM</p>
         </div>
 
     `;
@@ -168,11 +176,11 @@ function renderComplianceGrid(data) {
     const grid = document.getElementById('complianceGrid');
 
     const isCompliant = data.flag_color === 'GREEN' ;
-    const flagReason = data.flag_reason || "Keine Angabe";
+    const flagReason = data.flag_reason || "No information";
     const complianceColor = isCompliant ? "text-green-600" : "text-red-600";
     const complianceText = isCompliant ? "Compliant" : "not Compliant";
     const residuallKg = data.residual_kg || 0;
-    const residuallPct = data.residual_pct || 0;
+    const residuallPct = data.residual_pct * 100 || 0;
 
     if (flagReason === "ok") {
     grid.innerHTML = `
@@ -184,7 +192,7 @@ function renderComplianceGrid(data) {
         
         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <p class="text-sm text-gray-500">Residual %</p>
-            <p class="text-2xl font-bold">${residuallPct}</p>
+            <p class="text-2xl font-bold">${residuallPct}%</p>
         </div>
 
         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
@@ -222,10 +230,58 @@ function renderComplianceGrid(data) {
 function setLoading(isLoading) {
     const btn = form.querySelector('button');
     if (isLoading) {
-        btn.innerHTML = '<span class="animate-pulse">Suche...</span>';
+        btn.innerHTML = '<span class="animate-pulse">Loading...</span>';
         btn.disabled = true;
     } else {
-        btn.innerText = "Suchen";
+        btn.innerText = "Calculate";
         btn.disabled = false;
     }
+}
+
+// 2. Event Listener für den PDF Button hinzufügen
+
+if (pdfButton) {
+    pdfButton.addEventListener('click', async () => {
+        if (!currentShipData || !currentShipData.aiAnalysisText) {
+            alert("Please perform a KI-Analyse first.");
+            return;
+        }
+
+        const originalText = pdfButton.innerHTML;
+        pdfButton.innerHTML = '<span class="animate-pulse">Creating PDF...</span>';
+        pdfButton.disabled = true;
+
+        try {
+            // Anfrage an deine neue Route
+            const response = await fetch('/api/download-pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    imo: currentShipData.imo || currentShipData.IMO, // Achte auf Groß/Klein je nach DB
+                    text: currentShipData.aiAnalysisText
+                })
+            });
+
+            if (response.ok) {
+                // Den "Blob" (Datei) vom Server nehmen und Download starten
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Report_${currentShipData.imo}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } else {
+                throw new Error("Error during PDF Creation");
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert("Error during PDF Download");
+        } finally {
+            pdfButton.innerHTML = originalText;
+            pdfButton.disabled = false;
+        }
+    });
 }
