@@ -125,8 +125,6 @@ function roundNumbers(value) {
 }
 
 function renderShipDetails(data) {
-    // ACHTUNG: Prüfe in der Browser-Konsole, ob diese Namen (flag, type, etc.) stimmen!
-    // Die Namen kommen jetzt direkt aus deiner Parquet-Datei (oft kleingeschrieben).
     document.getElementById('uiName').textContent = data.ship_name || "Unknown Name";
     document.getElementById('uiImo').textContent = data.imo || data.IMO;
     
