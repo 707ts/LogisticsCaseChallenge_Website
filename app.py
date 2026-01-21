@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify, send_from_directory, send_file
 from ibm_watsonx_ai import APIClient
 from ibm_watsonx_ai.foundation_models import Model
 from report_gen import generate_report_pdf
+from dotenv import load_dotenv
 
 
 app = Flask(__name__, static_url_path='', static_folder='public')
@@ -31,13 +32,13 @@ except Exception as e:
 
 
 # --- KONFIGURATION ---
-
+load_dotenv
 credentials = {
-    "url": "https://au-syd.ml.cloud.ibm.com", # Achte darauf, dass die URL zu deinem Key passt (z.B. Dallas, Frankfurt, Sydney)
-    "apikey": "Zid4Fd_rirNn23gKAsXS7f-Dso0XaUlh2T9wxkNmhSc0" 
+    "url": os.getenv("WATSONX_URL"),
+    "apikey": os.getenv("WATSONX_APIKEY")
 }
 
-project_id = "94b4d34d-ffa1-4f15-b3ec-0e0b98f802f3"
+project_id = os.getenv("WATSONX_PROJECT_ID")
 model_id = "ibm/granite-3-8b-instruct"
 
 parameters = {

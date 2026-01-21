@@ -209,7 +209,7 @@ function renderComplianceGrid(data) {
         
         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <p class="text-sm text-gray-500">Residual %</p>
-            <p class="text-2xl font-bold">${residuallPct}</p>
+            <p class="text-2xl font-bold">${residuallPct}%</p>
         </div>
 
         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
