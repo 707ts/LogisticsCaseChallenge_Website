@@ -60,3 +60,49 @@ This dashboard helps users to:
 ```bash
 git clone [https://github.com/your-username/fueleu-dashboard.git](https://github.com/your-username/fueleu-dashboard.git)
 cd fueleu-dashboard
+
+### 2. Set up Python Environment
+Es wird empfohlen, eine virtuelle Umgebung zu nutzen:
+# Windows
+python -m venv .venv
+.venv\Scripts\activate
+
+# Mac/Linux
+python3 -m venv .venv
+source .venv/bin/activate
+
+### 3. Install Dependencies
+pip install flask pandas pyarrow python-dotenv ibm-watsonx-ai reportlab
+
+### 4. Configure Environment Variables
+WATSON_API_KEY=Dein_API_Key
+WATSON_URL=[https://au-syd.ml.cloud.ibm.com](https://au-syd.ml.cloud.ibm.com)
+WATSON_PROJECT_ID=Deine_Project_ID
+
+### 5. Start Application
+python app.py
+
+*📂 Project Structure
+/
+├── app.py                  # Main Server (Flask Backend API)
+├── report_gen.py           # Module for PDF generation
+├── ship_report_imo_2024.parquet # Database (Ship Data)
+├── .env                    # API Keys (excluded from Git)
+├── public/                 # Frontend Files
+│   ├── index.html          # Main Page
+│   ├── style.css           # Custom Styles
+│   └── js/
+│       └── main.js         # Frontend Logic (Fetch API, DOM Manipulation)
+└── requirements.txt        # Python Dependencies
+
+🧠 How it Works
+Search: The user enters an IMO number. The backend searches for the ship in the Parquet file.
+
+Validation: The system checks the flag_color column. If it is "RED", the reported CO₂ values deviate significantly from the prediction.
+
+AI Report: At the push of a button, the backend sends all ship data as a prompt to the WatsonX model (ibm/granite-3-8b-instruct). The AI analyzes the context and writes a summary.
+
+Export: The result can be downloaded as a PDF, which is dynamically generated using Python.
+
+📝 License
+This project was created as part of a university project work.
