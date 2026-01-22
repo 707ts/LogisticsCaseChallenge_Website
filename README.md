@@ -1,46 +1,62 @@
-FuelEU Maritime Compliance Dashboard
-A professional web application for analyzing maritime vessel compliance with EU MRV (Monitoring, Reporting, and Verification) and FuelEU Maritime regulations.
+# 🚢 FuelEU Maritime Compliance Dashboard
 
-Overview
-This dashboard helps maritime inspectors and compliance officers:
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Framework-Flask-lightgrey?logo=flask&logoColor=white)
+![IBM WatsonX](https://img.shields.io/badge/AI-IBM%20WatsonX-052FAD?logo=ibm&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/UI-Tailwind%20CSS-38B2AC?logo=tailwindcss&logoColor=white)
 
-Search vessel data by IMO number
-View detailed ship characteristics and AIS movement profiles
-Analyze CO₂ emission compliance with AI-powered insights
-Generate professional PDF reports with regulatory assessments
-Features
-Ship Search: Quick lookup of vessel data from a comprehensive parquet database
-Compliance Analysis: Automatic assessment against expected emission baselines
-AI-Powered Reports: IBM WatsonX AI generates detailed analysis and recommendations
-PDF Export: Professional report generation with charts and visualizations
-Responsive Design: Mobile-friendly dashboard using Tailwind CSS
+**A professional web application designed for maritime inspectors and compliance officers to analyze vessel compliance with EU MRV (Monitoring, Reporting, and Verification) and FuelEU Maritime regulations.**
 
-Installation
-Prerequisites
-Python 3.8+
-pip package manager
-Setup
-Clone the repository and navigate to the project directory
+---
 
-Create a virtual environment:
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+## 📖 Overview
 
-Install dependencies:
-pip install -r requirements.txt
+The FuelEU Maritime Compliance Dashboard streamlines the complex process of monitoring ship emissions. By integrating large-scale dataset queries with AI-powered insights, it provides a comprehensive tool for regulatory assessment.
 
-Configure environment variables:
-Create a .env file in the root directory:
-WATSONX_URL=https://api.us-south.ml.cloud.ibm.com
-WATSONX_APIKEY=your_ibm_api_key_here
-WATSONX_PROJECT_ID=your_project_id_here
+This dashboard helps users to:
+* **Search** vessel data instantly using IMO numbers.
+* **Visualize** detailed ship characteristics and AIS movement profiles.
+* **Analyze** CO₂ emission compliance against EU baselines.
+* **Generate** professional PDF reports with AI-driven recommendations.
 
-Add the ship database:
+---
 
-Place ship_report_imo_20xx.parquet in the root directory
+## ✨ Key Features
 
-Running the Application
-Start the Flask development server:
-python app.py
+* 🔍 **Ship Search Engine**
+    * Quick lookup of vessel data from a comprehensive Parquet database (`ship_report_imo_20xx.parquet`).
+* 📊 **Compliance Analysis**
+    * Automatic assessment of emission intensity.
+    * Visual comparison against FuelEU Maritime targets.
+* 🤖 **AI-Powered Insights**
+    * Integration with **IBM WatsonX** to generate detailed textual analysis.
+    * Automated recommendations for compliance improvements.
+* 📄 **Professional Reporting**
+    * One-click PDF export including charts, data tables, and AI assessments.
+* 📱 **Modern UI**
+    * Responsive, mobile-friendly design built with **Tailwind CSS**.
 
-The application will be available at http://localhost:5000
+---
+
+## 🛠 Tech Stack
+
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Backend** | Python / Flask | Core application logic and API handling |
+| **Frontend** | HTML5 / Tailwind CSS | Responsive user interface |
+| **AI / LLM** | IBM WatsonX | Generative AI for compliance reports |
+| **Data Storage** | Apache Parquet | High-performance columnar storage for ship data |
+| **Reporting** | ReportLab / WeasyPrint | PDF generation engine |
+
+---
+
+## ⚙️ Installation
+
+### Prerequisites
+* Python 3.8 or higher
+* `pip` package manager
+
+### 1. Clone the Repository
+```bash
+git clone [https://github.com/your-username/fueleu-dashboard.git](https://github.com/your-username/fueleu-dashboard.git)
+cd fueleu-dashboard
