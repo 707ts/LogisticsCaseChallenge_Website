@@ -41,5 +41,6 @@ Place ship_report_imo_20xx.parquet in the root directory
 
 Running the Application
 Start the Flask development server:
+python app.py
 
 The application will be available at http://localhost:5000
