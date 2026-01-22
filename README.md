@@ -60,6 +60,7 @@ This dashboard helps users to:
 ```bash
 git clone [https://github.com/your-username/fueleu-dashboard.git](https://github.com/your-username/fueleu-dashboard.git)
 cd fueleu-dashboard
+```
 
 ### 2. Set up Python Environment
 Es wird empfohlen, eine virtuelle Umgebung zu nutzen:
